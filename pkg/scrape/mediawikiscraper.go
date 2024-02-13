@@ -114,7 +114,7 @@ func (*MediaWikiParser) ParseSectionResponse(res *http.Response) (mediaWikiSecti
 	if err != nil {
 		return mediaWikiSectionResponse{}, err
 	}
-	if pageResponse.Error != nil {
+	if sectionResponse.Error != nil {
 		return mediaWikiSectionResponse{}, sectionResponse.Error
 	}
 	return sectionResponse, nil
