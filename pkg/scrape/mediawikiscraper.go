@@ -14,8 +14,6 @@ import (
 )
 
 // TODO: CLEAN UP LOGGING IN THIS FILE ITS DISGUSTING
-// INFO: Maybe embed the parser struct inside?
-// This seems to be ok for now
 type MediaWikiScraper struct {
 	BaseURL string
 	MediaWikiParser
@@ -24,8 +22,8 @@ type MediaWikiScraper struct {
 
 type MediaWikiParser struct{}
 
-// TODO: http request error handling: page does not exist, see postman
-// do we just add in an error struct alongside the parse one and check if it's null?
+// matches the structure of the media wiki api response when making a query for the sections of a page.
+// The error field is non-nil when the requested resource from the server does not exist
 type mediaWikiPageResponse struct {
 	Parse struct {
 		Title    string `json:"title"`
@@ -38,6 +36,8 @@ type mediaWikiPageResponse struct {
 	Error *MediaWikiAPIError `json:"error"`
 }
 
+// matches the structure of the media wiki api response when making a query for a specific section of a page
+// The error field is non-nil when the requested resource from the server does not exist
 type mediaWikiSectionResponse struct {
 	Parse struct {
 		Title string `json:"title"`
@@ -48,15 +48,35 @@ type mediaWikiSectionResponse struct {
 	Error *MediaWikiAPIError `json:"error"`
 }
 
+// Format for Media Wiki API Errors
+//
+// Some Error codes:
+//   - unknownerror:  If you get this error, retry your request until it succeeds or returns a more informative error message
+//   - permissiondenied:  Permission denied.
+//   - autoblocked:  Your IP address has been blocked automatically, because it was used by a blocked user
+//   - ratelimited:  You've exceeded your rate limit. Please wait some time and try again
+//   - badtoken:  Invalid token (did you remember to urlencode it?)
+//   - missingtitle:  The page you requested doesn't exist
+//   - nosuchpageid:  There is no page with ID id
+//   - invalidtitle:  Bad title "title"
+//   - readapidenied:  You need read permission to use this module
 type MediaWikiAPIError struct {
 	Code string `json:"code"`
 	Info string `json:"info"`
 }
 
+// Error method for MediaWikiAPI Error, returns a formatted error
+// including the error code and additional information
 func (e *MediaWikiAPIError) Error() string {
 	return fmt.Sprintf("MediaWiki API error: [code] %s [info] %s", e.Code, e.Info)
 }
 
+// Parses MediaWiki API http response from getting the sections of a page
+//
+// Can error in the following cases:
+//   - when extracting the body from the response
+//   - when unmarshalling the json byte array into pageResponse object
+//   - if the response has returned an error instead of the requested page
 func (*MediaWikiParser) ParsePageResponse(res *http.Response) (mediaWikiPageResponse, error) {
 	var pageResponse mediaWikiPageResponse
 
@@ -77,6 +97,12 @@ func (*MediaWikiParser) ParsePageResponse(res *http.Response) (mediaWikiPageResp
 	return pageResponse, nil
 }
 
+// Parses MediaWiki API http response from getting a single page section
+//
+// Can error in the following cases:
+//   - when extracting the body from the response
+//   - when unmarshalling the json byte array into sectionResponse object
+//   - if the response has returned an error instead of the requested page
 func (*MediaWikiParser) ParseSectionResponse(res *http.Response) (mediaWikiSectionResponse, error) {
 	var sectionResponse mediaWikiSectionResponse
 
@@ -94,6 +120,8 @@ func (*MediaWikiParser) ParseSectionResponse(res *http.Response) (mediaWikiSecti
 	return sectionResponse, nil
 }
 
+// Makes http requests to the wiki scraper's baseURL to retrieve data from a single page. Initial request is made to determine the number of sections
+// with subsequent requests retrieving and then parsing single sections.
 func (scraper *MediaWikiScraper) getPage(path string) (Page, error) {
 	logger.Log.WithField("page", path).Debug("scraping")
 	query, err := scraper.BuildPageQuery(path)
@@ -151,6 +179,7 @@ func (scraper *MediaWikiScraper) getPage(path string) (Page, error) {
 	return page, nil
 }
 
+// Parses raw HTML content of a section response.
 func (response mediaWikiSectionResponse) parseContent() (string, error) {
 	var content string
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(response.Parse.Text.Value))
@@ -163,6 +192,7 @@ func (response mediaWikiSectionResponse) parseContent() (string, error) {
 	return content, nil
 }
 
+// Loops over manifest to retrieve and parse each page
 func (scraper *MediaWikiScraper) Scrape(manifest manifest.Manifest) ([]Page, error) {
 	var pages []Page
 	for _, path := range manifest {
