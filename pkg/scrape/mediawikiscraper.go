@@ -2,6 +2,7 @@ package scrape
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -34,6 +35,7 @@ type mediaWikiPageResponse struct {
 			FromTitle string `json:"fromtitle"`
 		} `json:"sections"`
 	} `json:"parse"`
+	Error *MediaWikiAPIError `json:"error"`
 }
 
 type mediaWikiSectionResponse struct {
@@ -43,6 +45,16 @@ type mediaWikiSectionResponse struct {
 			Value string `json:"*"`
 		} `json:"text"`
 	} `json:"parse"`
+	Error *MediaWikiAPIError `json:"error"`
+}
+
+type MediaWikiAPIError struct {
+	Code string `json:"code"`
+	Info string `json:"info"`
+}
+
+func (e *MediaWikiAPIError) Error() string {
+	return fmt.Sprintf("MediaWiki API error: [code] %s [info] %s", e.Code, e.Info)
 }
 
 func (*MediaWikiParser) ParsePageResponse(res *http.Response) (mediaWikiPageResponse, error) {
@@ -58,6 +70,10 @@ func (*MediaWikiParser) ParsePageResponse(res *http.Response) (mediaWikiPageResp
 		return mediaWikiPageResponse{}, err
 	}
 
+	if pageResponse.Error != nil {
+		return mediaWikiPageResponse{}, pageResponse.Error
+	}
+
 	return pageResponse, nil
 }
 
@@ -71,6 +87,9 @@ func (*MediaWikiParser) ParseSectionResponse(res *http.Response) (mediaWikiSecti
 	err = json.Unmarshal(body, &sectionResponse)
 	if err != nil {
 		return mediaWikiSectionResponse{}, err
+	}
+	if pageResponse.Error != nil {
+		return mediaWikiSectionResponse{}, sectionResponse.Error
 	}
 	return sectionResponse, nil
 }
