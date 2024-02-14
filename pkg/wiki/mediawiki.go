@@ -1,7 +1,6 @@
 package wiki
 
 import (
-	"github.com/mal0ner/wikiscrape/internal/util"
 	"github.com/mal0ner/wikiscrape/pkg/export"
 	"github.com/mal0ner/wikiscrape/pkg/logging"
 	"github.com/mal0ner/wikiscrape/pkg/manifest"
@@ -23,9 +22,7 @@ func NewMediaWiki(name string, baseURL string) MediaWiki {
 		BaseURL: baseURL,
 		Pages:   []scrape.Page{},
 		Scraper: scrape.MediaWikiScraper{
-			BaseURL:               baseURL,
-			MediaWikiParser:       scrape.MediaWikiParser{},
-			MediaWikiQueryBuilder: util.MediaWikiQueryBuilder{},
+			BaseURL: baseURL,
 		},
 		Exporter: &export.TestExporter{},
 	}
