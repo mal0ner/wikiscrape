@@ -14,10 +14,14 @@ import (
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
+// Wraps methods for retrieving and parsing pages on
+// a MediaWiki based website.
 type MediaWikiScraper struct {
 	BaseURL string
 }
 
+// Representation of the json response returned
+// by making a request for the raw HTML of a MediaWiki page
 type mediaWikiPageResponse struct {
 	Parse struct {
 		Title string `json:"title"`
@@ -28,15 +32,21 @@ type mediaWikiPageResponse struct {
 	Error *MediaWikiAPIError `json:"error"`
 }
 
+// MediaWiki API error format, for a list of error codes
+// and their associated information see:
+// http://tinyurl.com/mwerrorcodes
 type MediaWikiAPIError struct {
 	Code string `json:"code"`
 	Info string `json:"info"`
 }
 
+// Returns formatted MediaWiki error including code and
+// additional information
 func (e *MediaWikiAPIError) Error() string {
 	return fmt.Sprintf("MediaWiki API error: [code] %s [info] %s", e.Code, e.Info)
 }
 
+// Build MediaWiki page request url with escaped parameters
 func (s *MediaWikiScraper) pageQuery(path string) (string, error) {
 	path, err := url.QueryUnescape(path)
 	if err != nil {
@@ -49,6 +59,13 @@ func (s *MediaWikiScraper) pageQuery(path string) (string, error) {
 	return s.BaseURL + "?" + params.Encode(), nil
 }
 
+// Makes a http request to the MediaWiki API endpoint
+// for the page specified by the path, then parses and
+// returns the response as a mediaWikiPageResponse
+// Can return a MediaWikiAPIError if (for example):
+//   - The page does not exist
+//   - The user is denied read access to the page
+//   - The user has been rate-limited and should try again
 func (s *MediaWikiScraper) fetchPage(path string) (mediaWikiPageResponse, error) {
 	var result mediaWikiPageResponse
 	url, err := s.pageQuery(path)
@@ -75,6 +92,8 @@ func (s *MediaWikiScraper) fetchPage(path string) (mediaWikiPageResponse, error)
 	return result, nil
 }
 
+// Fetches a page specified by path, parses its sections and returns
+// a Page{} instance
 func (s *MediaWikiScraper) getPage(path string) (Page, error) {
 	response, err := s.fetchPage(path)
 	if err != nil {
@@ -91,6 +110,9 @@ func (s *MediaWikiScraper) getPage(path string) (Page, error) {
 	}, nil
 }
 
+// Parses raw HTML from mediaWikiPageResponse into an array of
+// Section{}, including headings and body text
+// TODO: Add table parsing support
 func (response *mediaWikiPageResponse) parseSections() ([]Section, error) {
 	var sections []Section
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(response.Parse.Text.Value))
@@ -131,6 +153,8 @@ func (response *mediaWikiPageResponse) parseSections() ([]Section, error) {
 	return sections, err
 }
 
+// Scrapes each page from a list of pages and returns them
+// as a list of formatted Page{} objects.
 func (s *MediaWikiScraper) Scrape(manifest manifest.Manifest) ([]Page, error) {
 	var pages []Page
 	for _, path := range manifest {
