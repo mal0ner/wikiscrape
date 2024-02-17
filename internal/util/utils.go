@@ -1,5 +1,7 @@
 package util
 
-func CheckAPIProvider(url string) string {
-	return ""
+import "strings"
+
+func TrimLower(s string) string {
+	return strings.TrimSpace(strings.ToLower(s))
 }

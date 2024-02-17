@@ -9,6 +9,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/mal0ner/wikiscrape/internal/util"
 	"github.com/mal0ner/wikiscrape/pkg/manifest"
 )
 
@@ -93,27 +94,45 @@ func (s *MediaWikiScraper) fetchPage(path string) (mediaWikiPageResponse, error)
 }
 
 // Fetches a page specified by path, parses its sections and returns
-// a Page{} instance
-func (s *MediaWikiScraper) getPage(path string) (Page, error) {
+// a GetPage{} instance
+func (s *MediaWikiScraper) GetPage(path string) (*Page, error) {
 	response, err := s.fetchPage(path)
 	if err != nil {
-		return Page{}, err
+		return &Page{}, err
 	}
-	sections, err := response.parseSections()
+	sections, err := response.ParseSections()
 	if err != nil {
-		return Page{}, err
+		return &Page{}, err
 	}
-	return Page{
+	return &Page{
 		Title:    response.Parse.Title,
 		Url:      "test",
 		Sections: sections,
 	}, nil
 }
 
+// Searches for a specific section of the specified page given a heading.
+// parses and returns the section if found, otherwise returns a mediaWikiAPIError
+func (s *MediaWikiScraper) GetSection(path string, heading string) (*Page, error) {
+	response, err := s.fetchPage(path)
+	if err != nil {
+		return &Page{}, err
+	}
+	section, err := response.ParseSection(heading)
+	if err != nil {
+		return &Page{}, err
+	}
+	return &Page{
+		Title:    response.Parse.Title,
+		Url:      "test", // TODO: Fix,
+		Sections: []Section{section},
+	}, nil
+}
+
 // Parses raw HTML from mediaWikiPageResponse into an array of
 // Section{}, including headings and body text
 // TODO: Add table parsing support
-func (response *mediaWikiPageResponse) parseSections() ([]Section, error) {
+func (response *mediaWikiPageResponse) ParseSections() ([]Section, error) {
 	var sections []Section
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(response.Parse.Text.Value))
 	if err != nil {
@@ -153,12 +172,48 @@ func (response *mediaWikiPageResponse) parseSections() ([]Section, error) {
 	return sections, err
 }
 
+func (response *mediaWikiPageResponse) ParseSection(heading string) (Section, error) {
+	var section Section
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(response.Parse.Text.Value))
+	if err != nil {
+		return Section{}, err
+	}
+	found := false
+	doc.Find("h2 > span.mw-headline").EachWithBreak(func(i int, h2 *goquery.Selection) bool {
+		if util.TrimLower(h2.Text()) == util.TrimLower(heading) {
+			section.Heading = h2.Text()
+			section.Index = i
+			var contentBuilder strings.Builder
+			h2.Parent().NextFilteredUntil("p", "h2 > span.mw-headline").Each(func(i int, s *goquery.Selection) {
+				contentBuilder.WriteString(s.Text())
+			})
+			section.Content = contentBuilder.String()
+			found = true
+			return false
+		}
+		return true
+	})
+
+	if !found {
+		return Section{}, &MediaWikiAPIError{
+			Code: "sectionnotfound",
+			Info: "The section with that heading does not exist on the specified page",
+		}
+	}
+	return section, nil
+}
+
 // Scrapes each page from a list of pages and returns them
 // as a list of formatted Page{} objects.
-func (s *MediaWikiScraper) Scrape(manifest manifest.Manifest) ([]Page, error) {
-	var pages []Page
+// Maybe it doesnt make sense to have this in here??
+// TODO: Move this to the wiki instead, That way we can control whether to
+// accumulate the pages in a list or export them individually (so we can incrementally
+// save our progress in downloading the data) (what would happen if we got rate-limited
+// halfway through the 13 hour process and everything was lost cx)
+func (s *MediaWikiScraper) Scrape(manifest manifest.Manifest) ([]*Page, error) {
+	var pages []*Page
 	for _, path := range manifest {
-		page, err := s.getPage(path)
+		page, err := s.GetPage(path)
 		if err != nil {
 			return []Page{}, err
 		}
