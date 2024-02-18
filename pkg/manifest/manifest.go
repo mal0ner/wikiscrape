@@ -1,9 +1,12 @@
 package manifest
 
 import (
-	"encoding/json"
 	"os"
+
+	jsoniter "github.com/json-iterator/go"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type Manifest []string
 
