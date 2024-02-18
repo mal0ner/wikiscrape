@@ -18,6 +18,6 @@ type Response interface {
 }
 
 type Scraper interface {
-	GetPage(path string) (Page, error)
-	GetSection(path string, heading string) (Section, error)
+	GetPage(path string) (*Page, error)
+	GetSection(path string, heading string) (*Page, error)
 }

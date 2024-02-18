@@ -19,9 +19,10 @@ func main() {
 	w := wiki.NewMediaWiki("Old School Runescape", "https://oldschool.runescape.wiki/api.php")
 	w.Manifest = paths
 
-	err = w.Crawl()
+	// err = w.ScrapeAndExport()
+	err = w.Section("Zulrah", "drops")
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	w.Export()
+	// w.Export()
 }

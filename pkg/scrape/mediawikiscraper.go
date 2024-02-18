@@ -10,7 +10,6 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/mal0ner/wikiscrape/internal/util"
-	"github.com/mal0ner/wikiscrape/pkg/manifest"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -197,7 +196,7 @@ func (response *mediaWikiPageResponse) ParseSection(heading string) (Section, er
 	if !found {
 		return Section{}, &MediaWikiAPIError{
 			Code: "sectionnotfound",
-			Info: "The section with that heading does not exist on the specified page",
+			Info: fmt.Sprintf("The section with heading %s was not found on page %s", heading, response.Parse.Title),
 		}
 	}
 	return section, nil
@@ -210,14 +209,15 @@ func (response *mediaWikiPageResponse) ParseSection(heading string) (Section, er
 // accumulate the pages in a list or export them individually (so we can incrementally
 // save our progress in downloading the data) (what would happen if we got rate-limited
 // halfway through the 13 hour process and everything was lost cx)
-func (s *MediaWikiScraper) Scrape(manifest manifest.Manifest) ([]*Page, error) {
-	var pages []*Page
-	for _, path := range manifest {
-		page, err := s.GetPage(path)
-		if err != nil {
-			return []Page{}, err
-		}
-		pages = append(pages, page)
-	}
-	return pages, nil
-}
+
+// func (s *MediaWikiScraper) Scrape(manifest manifest.Manifest) ([]*Page, error) {
+// 	var pages []*Page
+// 	for _, path := range manifest {
+// 		page, err := s.GetPage(path)
+// 		if err != nil {
+// 			return []Page{}, err
+// 		}
+// 		pages = append(pages, page)
+// 	}
+// 	return pages, nil
+// }
