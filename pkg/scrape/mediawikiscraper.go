@@ -201,23 +201,3 @@ func (response *mediaWikiPageResponse) ParseSection(heading string) (Section, er
 	}
 	return section, nil
 }
-
-// Scrapes each page from a list of pages and returns them
-// as a list of formatted Page{} objects.
-// Maybe it doesnt make sense to have this in here??
-// TODO: Move this to the wiki instead, That way we can control whether to
-// accumulate the pages in a list or export them individually (so we can incrementally
-// save our progress in downloading the data) (what would happen if we got rate-limited
-// halfway through the 13 hour process and everything was lost cx)
-
-// func (s *MediaWikiScraper) Scrape(manifest manifest.Manifest) ([]*Page, error) {
-// 	var pages []*Page
-// 	for _, path := range manifest {
-// 		page, err := s.GetPage(path)
-// 		if err != nil {
-// 			return []Page{}, err
-// 		}
-// 		pages = append(pages, page)
-// 	}
-// 	return pages, nil
-// }
