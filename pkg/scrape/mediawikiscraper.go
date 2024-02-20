@@ -59,9 +59,9 @@ func (s *MediaWikiScraper) pageQuery(path string) (string, error) {
 	return s.BaseURL + "?" + params.Encode(), nil
 }
 
-// Makes a http request to the MediaWiki API endpoint
-// for the page specified by the path, then parses and
-// returns the response as a mediaWikiPageResponse
+// fetchPage makes a http request to the MediaWiki API endpoint
+// for the page specified by the path, then unmarshals the response.
+// Returns a mediaWikiPageResponse.
 // Can return a MediaWikiAPIError if (for example):
 //   - The page does not exist
 //   - The user is denied read access to the page
@@ -92,8 +92,13 @@ func (s *MediaWikiScraper) fetchPage(path string) (mediaWikiPageResponse, error)
 	return result, nil
 }
 
-// Fetches a page specified by path, parses its sections and returns
-// a GetPage{} instance
+// GetPage first fetches the page specified by path before parsing
+// its content.
+// Returns a Page containing the content parsed from the HTML response.
+//
+// Can error when:
+//   - page fetch fails.
+//   - section parsing fails
 func (s *MediaWikiScraper) GetPage(path string) (*Page, error) {
 	response, err := s.fetchPage(path)
 	if err != nil {
@@ -126,8 +131,12 @@ func (s *MediaWikiScraper) GetSection(path string, heading string) (*Page, error
 	}, nil
 }
 
-// Parses raw HTML from mediaWikiPageResponse into an array of
-// Section{}, including headings and body text
+// ParseSections parses raw HTML from mediaWikiPageResponse.
+// Returns an array of Sections containing headlines and body text.
+//
+// Can error when:
+//   - The content in the response is not valid HTML
+//
 // TODO: Add table parsing support
 func (response *mediaWikiPageResponse) ParseSections() ([]Section, error) {
 	var sections []Section
@@ -162,13 +171,20 @@ func (response *mediaWikiPageResponse) ParseSections() ([]Section, error) {
 		})
 		sections = append(sections, Section{
 			Heading: title,
-			Index:   i,
+			Index:   i + 1,
 			Content: contentBuilder.String(),
 		})
 	})
 	return sections, err
 }
 
+// ParseSection parses the raw HTML of a mediaWikiPageResponse and searches for a section
+// that contains the heading specified by the function argument.
+// Returns a Section containing the heading and its corresponding body text.
+//
+// Can error when:
+//   - The content in the response is not valid HTML
+//   - The heading is not found.
 func (response *mediaWikiPageResponse) ParseSection(heading string) (Section, error) {
 	var section Section
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(response.Parse.Text.Value))
