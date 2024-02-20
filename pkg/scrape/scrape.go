@@ -2,7 +2,6 @@ package scrape
 
 type Page struct {
 	Title    string
-	Url      string
 	Sections []Section
 }
 

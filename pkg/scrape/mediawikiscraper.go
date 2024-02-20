@@ -105,7 +105,6 @@ func (s *MediaWikiScraper) GetPage(path string) (*Page, error) {
 	}
 	return &Page{
 		Title:    response.Parse.Title,
-		Url:      "test",
 		Sections: sections,
 	}, nil
 }
@@ -123,7 +122,6 @@ func (s *MediaWikiScraper) GetSection(path string, heading string) (*Page, error
 	}
 	return &Page{
 		Title:    response.Parse.Title,
-		Url:      "test", // TODO: Fix,
 		Sections: []Section{section},
 	}, nil
 }
