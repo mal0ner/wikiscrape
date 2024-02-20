@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	//lol
+	// lol
 	logger.Log.SetLevel(5)
 	paths, err := manifest.ReadFrom("manifest.json")
 	if err != nil {
