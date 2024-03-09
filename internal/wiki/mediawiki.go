@@ -1,10 +1,10 @@
 package wiki
 
 import (
-	"github.com/mal0ner/wikiscrape/pkg/export"
-	"github.com/mal0ner/wikiscrape/pkg/logging"
-	"github.com/mal0ner/wikiscrape/pkg/manifest"
-	"github.com/mal0ner/wikiscrape/pkg/scrape"
+	"github.com/mal0ner/wikiscrape/internal/export"
+	"github.com/mal0ner/wikiscrape/internal/logging"
+	"github.com/mal0ner/wikiscrape/internal/manifest"
+	"github.com/mal0ner/wikiscrape/internal/scrape"
 	"github.com/sirupsen/logrus"
 )
 

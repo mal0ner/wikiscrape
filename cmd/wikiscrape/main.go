@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	logger "github.com/mal0ner/wikiscrape/pkg/logging"
-	"github.com/mal0ner/wikiscrape/pkg/manifest"
-	"github.com/mal0ner/wikiscrape/pkg/wiki"
+	logger "github.com/mal0ner/wikiscrape/internal/logging"
+	"github.com/mal0ner/wikiscrape/internal/manifest"
+	"github.com/mal0ner/wikiscrape/internal/wiki"
 )
 
 func main() {

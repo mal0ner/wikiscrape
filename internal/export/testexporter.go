@@ -3,7 +3,7 @@ package export
 import (
 	"fmt"
 
-	"github.com/mal0ner/wikiscrape/pkg/scrape"
+	"github.com/mal0ner/wikiscrape/internal/scrape"
 )
 
 type TestExporter struct{}
