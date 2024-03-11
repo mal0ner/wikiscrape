@@ -30,7 +30,7 @@ func init() {
 	GetCmd.AddCommand(sectionCmd)
 }
 
-func getScraperFromQueryData(queryData *util.QueryData) (wiki.Wiki, error) {
+func getWikiFromQueryData(queryData *util.QueryData) (wiki.Wiki, error) {
 	backend := util.TrimLower(queryData.Info.Backend)
 	switch backend {
 	case "mediawiki":
@@ -47,10 +47,26 @@ func getPageFromURL(rawURL string) error {
 	if err != nil {
 		return err
 	}
-	w, err := getScraperFromQueryData(queryData)
+	w, err := getWikiFromQueryData(queryData)
 	if err != nil {
 		return err
 	}
 	err = w.Page(queryData.Page)
+	return nil
+}
+
+func getPageFromName(pageName string, wikiName string) error {
+	queryData, err := util.GetQueryDataFromName(pageName, wikiName)
+	if err != nil {
+		return err
+	}
+	w, err := getWikiFromQueryData(queryData)
+	if err != nil {
+		return err
+	}
+	err = w.Page(queryData.Page)
+	if err != nil {
+		return err
+	}
 	return nil
 }
