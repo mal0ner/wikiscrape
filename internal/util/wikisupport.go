@@ -12,7 +12,7 @@ type wikiInfo struct {
 	Backend        string
 }
 
-type queryData struct {
+type QueryData struct {
 	Info *wikiInfo
 	Page string
 }
@@ -33,16 +33,16 @@ var supportedWikiHosts = map[string]*wikiInfo{
 	"oldschool.runescape.wiki": newWikiInfo("https://oldschool.runescape.wiki/api.php", "/w/", "mediawiki"),
 }
 
-type wikiNotSupportedError struct {
+type WikiNotSupportedError struct {
 	Code string
 	Info string
 }
 
-func (e *wikiNotSupportedError) Error() string {
+func (e *WikiNotSupportedError) Error() string {
 	return fmt.Sprintf("WikiNotSupportedError: [code] %s [info] %s", e.Code, e.Info)
 }
 
-func GetQueryDataFromURL(rawURL string) (*queryData, error) {
+func GetQueryDataFromURL(rawURL string) (*QueryData, error) {
 	parsedURL, err := url.ParseRequestURI(rawURL)
 	if err != nil {
 		return nil, err
@@ -52,25 +52,25 @@ func GetQueryDataFromURL(rawURL string) (*queryData, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &queryData{
+		return &QueryData{
 			Page: pageName,
 			Info: info,
 		}, nil
 	}
-	return nil, &wikiNotSupportedError{
+	return nil, &WikiNotSupportedError{
 		Code: "hostnotfound",
 		Info: "The provided host is not yet supported (unknown api endpoint or page prefix)",
 	}
 }
 
-func GetQueryDataFromName(pageName string, wikiName string) (*queryData, error) {
+func GetQueryDataFromName(pageName string, wikiName string) (*QueryData, error) {
 	if info, ok := supportedWikiNames[wikiName]; ok {
-		return &queryData{
+		return &QueryData{
 			Page: pageName,
 			Info: info,
 		}, nil
 	}
-	return nil, &wikiNotSupportedError{
+	return nil, &WikiNotSupportedError{
 		Code: "namenotfound",
 		Info: "The provided name is not yet supported (unknown api endpoint or page prefix)",
 	}
