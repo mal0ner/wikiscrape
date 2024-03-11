@@ -33,6 +33,10 @@ var supportedWikiHosts = map[string]*wikiInfo{
 	"oldschool.runescape.wiki": newWikiInfo("https://oldschool.runescape.wiki/api.php", "/w/", "mediawiki"),
 }
 
+var supportedBackends = []string{
+	"mediawiki",
+}
+
 type WikiNotSupportedError struct {
 	Code string
 	Info string
@@ -91,4 +95,8 @@ func GetSupportedWikis() []string {
 		i++
 	}
 	return keys
+}
+
+func GetSupportedBackends() []string {
+	return supportedBackends
 }

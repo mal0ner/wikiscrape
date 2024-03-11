@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/mal0ner/wikiscrape/cmd/get"
+	"github.com/mal0ner/wikiscrape/cmd/list"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +19,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(get.GetCmd)
+	rootCmd.AddCommand(list.ListCmd)
 }
 
 func Execute() {
