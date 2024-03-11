@@ -32,7 +32,7 @@ func NewMediaWiki(name string, baseURL string) MediaWiki {
 	}
 }
 
-func (w *MediaWiki) ScrapeAndExport(man manifest.Manifest) error {
+func (w MediaWiki) ScrapeAndExport(man manifest.Manifest) error {
 	// Exporting pages individually as they are gathered seems to be the
 	// best approach here, aggregating thousands of pages into a slice
 	// of structs only to export them immediately after seems like a waste
@@ -54,7 +54,7 @@ func (w *MediaWiki) ScrapeAndExport(man manifest.Manifest) error {
 }
 
 // TODO: Rename this and maybe make the scraper methods private??
-func (w *MediaWiki) Page(path string) error {
+func (w MediaWiki) Page(path string) error {
 	page, err := w.GetPage(path)
 	if err != nil {
 		return err
@@ -64,7 +64,7 @@ func (w *MediaWiki) Page(path string) error {
 }
 
 // TODO: Rename this and maybe make the scraper methods private??
-func (w *MediaWiki) Section(path string, heading string) error {
+func (w MediaWiki) Section(path string, heading string) error {
 	page, err := w.GetSection(path, heading)
 	if err != nil {
 		return err

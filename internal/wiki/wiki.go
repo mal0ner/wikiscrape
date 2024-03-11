@@ -1,6 +1,10 @@
 package wiki
 
+import (
+	"github.com/mal0ner/wikiscrape/internal/manifest"
+)
+
 type Wiki interface {
-	Crawl() error
-	Export() error
+	ScrapeAndExport(manifest.Manifest) error
+	Page(string) error
 }
