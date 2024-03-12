@@ -2,10 +2,8 @@ package wiki
 
 import (
 	"github.com/mal0ner/wikiscrape/internal/export"
-	"github.com/mal0ner/wikiscrape/internal/logging"
 	"github.com/mal0ner/wikiscrape/internal/manifest"
 	"github.com/mal0ner/wikiscrape/internal/scrape"
-	"github.com/sirupsen/logrus"
 )
 
 type MediaWiki struct {
@@ -38,14 +36,9 @@ func (w MediaWiki) ScrapeAndExport(man manifest.Manifest) error {
 	// of structs only to export them immediately after seems like a waste
 	// bc extra memory consumption. We do lose the ability to
 	// export concurrently though
-	logging.Log.WithField("name", w.Name).Info("Crawling")
 	for _, path := range man {
 		page, err := w.GetPage(path)
 		if err != nil {
-			logging.Log.WithFields(logrus.Fields{
-				"page":  path,
-				"error": err.Error(),
-			}).Error("Failed to get page")
 			continue
 		}
 		w.Export(*page) // TODO: Cleanup pointers
