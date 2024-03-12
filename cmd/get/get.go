@@ -28,13 +28,14 @@ var GetCmd = &cobra.Command{
 
 func init() {
 	GetCmd.AddCommand(pageCmd)
+	GetCmd.AddCommand(pagesCmd)
 	GetCmd.PersistentFlags().StringVarP(&section, "section", "s", "", "section heading you wish to scrape")
 }
 
 // getWikiFromQueryData identifies and returns the appropriate wiki scraper for the wiki provider listed
 // in the generated queryData from a 'get' command request. Returns a WikiNotSupportedError in the case
 // that the provider is not explicitly supported.
-func getWikiFromQueryData(queryData *util.QueryData) (wiki.Wiki, *util.WikiNotSupportedError) {
+func getWikiFromQueryData(queryData *util.QueryData) (wiki.Wiki, error) {
 	backend := util.TrimLower(queryData.Info.Backend)
 	switch backend {
 	case "mediawiki":
