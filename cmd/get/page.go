@@ -4,6 +4,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Long message
+var pageMsg = "Get and export a single page from a wiki, given the page name and wiki provider.\n\nFor a list of supported wikis and export formats, please see \"wikiscrape list -h\".\n"
+
+// Flag vars
+var wikiName string
+
+// Command
 var pageCmd = &cobra.Command{
 	Use:   "page",
 	Short: "Get a single page",
@@ -11,17 +18,11 @@ var pageCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
 		pageName := args[0]
-		err := getPageFromName(pageName, wikiName)
-		if err != nil {
-			return err
-		}
-		return nil
+		return getPageFromName(pageName, wikiName, section)
 	},
 }
 
-var wikiName string
-
 func init() {
-	pageCmd.Flags().StringVarP(&wikiName, "wiki", "w", "", "Name of the wiki you wish to scrape")
+	pageCmd.Flags().StringVarP(&wikiName, "wiki", "w", "", "name of the wiki you wish to scrape")
 	pageCmd.MarkFlagRequired("wiki")
 }
