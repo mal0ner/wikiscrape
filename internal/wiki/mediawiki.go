@@ -6,6 +6,9 @@ import (
 	"github.com/mal0ner/wikiscrape/internal/util"
 )
 
+// MediaWiki represents a "Wiki" interface compliant implementation
+// with fields and methods designed to add support for querying from
+// the Media Wiki API and parsing / manipulating the pages.
 type MediaWiki struct {
 	Name    string
 	BaseURL string
@@ -14,6 +17,8 @@ type MediaWiki struct {
 	util.Manifest
 }
 
+// NewMediaWiki instantiates a new Media Wiki with a provided name and
+// base url, as well as sensible defaults for the scraper and exporter.
 func NewMediaWiki(name string, baseURL string) MediaWiki {
 	return MediaWiki{
 		Name:     name,
@@ -23,8 +28,10 @@ func NewMediaWiki(name string, baseURL string) MediaWiki {
 	}
 }
 
-// TODO: Add Pointer receiver here
+// ScrapeAndExport loops over a util.Manifest ([]string) list of page
+// names, scraping and then exporting each page sequentially.
 func (w MediaWiki) ScrapeAndExport(man util.Manifest) error {
+	// TODO: Add Pointer receiver here
 	// Exporting pages individually as they are gathered seems to be the
 	// best approach here, aggregating thousands of pages into a slice
 	// of structs only to export them immediately after seems like a waste
@@ -40,9 +47,11 @@ func (w MediaWiki) ScrapeAndExport(man util.Manifest) error {
 	return nil
 }
 
-// TODO: Rename this and maybe make the scraper methods private??
-// TODO: Add Pointer receiver here
+// Page provides a convenient wrapper around the wiki's
+// scraper and exporter. Fetches, parses, and exports a single
+// page given its name.
 func (w MediaWiki) Page(path string) error {
+	// TODO: Add Pointer receiver here
 	page, err := w.GetPage(path)
 	if err != nil {
 		return err
@@ -51,9 +60,11 @@ func (w MediaWiki) Page(path string) error {
 	return nil
 }
 
-// TODO: Rename this and maybe make the scraper methods private??
-// TODO: Add Pointer receiver here
+// Section provides a convenient wrapper around the wiki's
+// scraper and exporter. Fetches, parses, and exports a single
+// section of a single page given its name.
 func (w MediaWiki) Section(path string, heading string) error {
+	// TODO: Add Pointer receiver here
 	page, err := w.GetSection(path, heading)
 	if err != nil {
 		return err
@@ -61,3 +72,5 @@ func (w MediaWiki) Section(path string, heading string) error {
 	w.Export(*page) // TODO: Pointer here?
 	return nil
 }
+
+// TODO: Maybe fix these above methods? Especially the names.

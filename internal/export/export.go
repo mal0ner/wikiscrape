@@ -1,4 +1,4 @@
-// package wikiscrape/export handles interface specification for
+// Package export handles interface specification for
 // wiki-agnostic exporters for page instances created by the
 // scrape package
 package export

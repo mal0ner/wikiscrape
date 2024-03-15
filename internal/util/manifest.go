@@ -10,6 +10,8 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type Manifest []string
 
+// ReadManifestFrom accepts a path to a JSON file containing
+// an array of page names and reads its content.
 func ReadManifestFrom(filepath string) (Manifest, error) {
 	manFile, err := os.ReadFile(filepath)
 	if err != nil {

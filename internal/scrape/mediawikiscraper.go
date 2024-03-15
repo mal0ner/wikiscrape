@@ -41,13 +41,28 @@ type MediaWikiAPIError struct {
 	Info string `json:"info"`
 }
 
-// Returns formatted MediaWiki error including code and
+// Error returns a formatted MediaWiki error including code and
 // additional information
 func (e *MediaWikiAPIError) Error() string {
 	return fmt.Sprintf("MediaWiki API error: [code] %s [info] %s", e.Code, e.Info)
 }
 
-// Build MediaWiki page request url with escaped parameters
+// pageQuery builds an encoded Media Wiki page request url given the path of a page.
+//
+// In this case,
+// 'path' refers to the segment of a Media Wiki url which holds the unique page
+// name/title. This can be found using the url.ParseRequestURI assuming pre-existing
+// knowledge of the way in which the wiki prefixes their page names in urls.
+// The ParseRequestURI method returns:
+//
+//	Input: "https://en.wikipedia.org/wiki/Bear"
+//	Output:
+//	  url.Scheme: "https"
+//	  url.Host:   "en.wikipedia.org"
+//	  url.Path:   "wiki/Bear"
+//
+// With a known page prefix: "wiki/", mapped to by the host name, we can simply
+// strip this from the path and receive the page name.
 func (s *MediaWikiScraper) pageQuery(path string) (string, error) {
 	path, err := url.QueryUnescape(path)
 	if err != nil {
@@ -119,8 +134,7 @@ func (s *MediaWikiScraper) GetPage(path string) (*Page, error) {
 	}, nil
 }
 
-// Searches for a specific section of the specified page given a heading.
-// parses and returns the section if found, otherwise returns a mediaWikiAPIError
+// GetSection searches for a section of a page by heading, and returns it if found.
 func (s *MediaWikiScraper) GetSection(path string, heading string) (*Page, error) {
 	response, err := s.fetchPage(path)
 	if err != nil {
@@ -145,12 +159,14 @@ func (s *MediaWikiScraper) GetSection(path string, heading string) (*Page, error
 // TODO: Add table parsing support
 func (response *mediaWikiPageResponse) ParseSections() ([]*Section, error) {
 	var sections []*Section
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(response.Parse.Text.Value))
+	doc, err := goquery.NewDocumentFromReader(
+		strings.NewReader(response.Parse.Text.Value),
+	)
 	if err != nil {
 		return nil, err
 	}
-	// Create first section manually because its header is not included in the ".mw-parser-output"
-	// seems kinda sketch TODO: FIX???
+	// Create first section manually because its header is not included in the
+	// ".mw-parser-output"
 	var introBuilder strings.Builder
 	doc.Find("*").EachWithBreak(func(i int, s *goquery.Selection) bool {
 		if s.Is("h2") && s.Find("span.mw-headline").Length() > 0 {
