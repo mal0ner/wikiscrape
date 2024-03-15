@@ -8,7 +8,7 @@ package scrape
 
 type Page struct {
 	Title    string
-	Sections []Section
+	Sections []*Section
 }
 
 type Section struct {

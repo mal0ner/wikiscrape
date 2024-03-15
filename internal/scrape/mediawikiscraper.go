@@ -1,6 +1,7 @@
 package scrape
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -66,30 +67,34 @@ func (s *MediaWikiScraper) pageQuery(path string) (string, error) {
 //   - The page does not exist
 //   - The user is denied read access to the page
 //   - The user has been rate-limited and should try again
-func (s *MediaWikiScraper) fetchPage(path string) (mediaWikiPageResponse, error) {
+func (s *MediaWikiScraper) fetchPage(path string) (*mediaWikiPageResponse, error) {
 	var result mediaWikiPageResponse
 	url, err := s.pageQuery(path)
 	if err != nil {
-		return mediaWikiPageResponse{}, err
+		return nil, err
 	}
 	res, err := http.Get(url)
 	if err != nil {
-		return mediaWikiPageResponse{}, err
+		return nil, err
 	}
-	body, err := io.ReadAll(res.Body)
+	defer res.Body.Close()
+
+	var buf bytes.Buffer
+	_, err = io.Copy(&buf, res.Body)
+	// body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return mediaWikiPageResponse{}, err
+		return nil, err
 	}
-	err = json.Unmarshal(body, &result)
+	err = json.NewDecoder(&buf).Decode(&result)
 	if err != nil {
-		return mediaWikiPageResponse{}, err
+		return nil, err
 	}
 
 	if result.Error != nil {
-		return mediaWikiPageResponse{}, result.Error
+		return nil, result.Error
 	}
 
-	return result, nil
+	return &result, nil
 }
 
 // GetPage first fetches the page specified by path before parsing
@@ -127,7 +132,7 @@ func (s *MediaWikiScraper) GetSection(path string, heading string) (*Page, error
 	}
 	return &Page{
 		Title:    response.Parse.Title,
-		Sections: []Section{section},
+		Sections: []*Section{section},
 	}, nil
 }
 
@@ -138,11 +143,11 @@ func (s *MediaWikiScraper) GetSection(path string, heading string) (*Page, error
 //   - The content in the response is not valid HTML
 //
 // TODO: Add table parsing support
-func (response *mediaWikiPageResponse) ParseSections() ([]Section, error) {
-	var sections []Section
+func (response *mediaWikiPageResponse) ParseSections() ([]*Section, error) {
+	var sections []*Section
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(response.Parse.Text.Value))
 	if err != nil {
-		return []Section{}, err
+		return nil, err
 	}
 	// Create first section manually because its header is not included in the ".mw-parser-output"
 	// seems kinda sketch TODO: FIX???
@@ -161,7 +166,7 @@ func (response *mediaWikiPageResponse) ParseSections() ([]Section, error) {
 		Index:   0,
 		Content: introBuilder.String(),
 	}
-	sections = append(sections, intro)
+	sections = append(sections, &intro)
 	// get remaining sections
 	doc.Find("h2 > span.mw-headline").Each(func(i int, h2 *goquery.Selection) {
 		title := h2.Text()
@@ -169,7 +174,7 @@ func (response *mediaWikiPageResponse) ParseSections() ([]Section, error) {
 		h2.Parent().NextFilteredUntil("p", "h2 > span.mw-headline").Each(func(i int, s *goquery.Selection) {
 			contentBuilder.WriteString(s.Text())
 		})
-		sections = append(sections, Section{
+		sections = append(sections, &Section{
 			Heading: title,
 			Index:   i + 1,
 			Content: contentBuilder.String(),
@@ -185,11 +190,11 @@ func (response *mediaWikiPageResponse) ParseSections() ([]Section, error) {
 // Can error when:
 //   - The content in the response is not valid HTML
 //   - The heading is not found.
-func (response *mediaWikiPageResponse) ParseSection(heading string) (Section, error) {
+func (response *mediaWikiPageResponse) ParseSection(heading string) (*Section, error) {
 	var section Section
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(response.Parse.Text.Value))
 	if err != nil {
-		return Section{}, err
+		return nil, err
 	}
 	found := false
 	doc.Find("h2 > span.mw-headline").EachWithBreak(func(i int, h2 *goquery.Selection) bool {
@@ -208,10 +213,10 @@ func (response *mediaWikiPageResponse) ParseSection(heading string) (Section, er
 	})
 
 	if !found {
-		return Section{}, &MediaWikiAPIError{
+		return nil, &MediaWikiAPIError{
 			Code: "sectionnotfound",
 			Info: fmt.Sprintf("The section with heading %s was not found on page %s", heading, response.Parse.Title),
 		}
 	}
-	return section, nil
+	return &section, nil
 }
