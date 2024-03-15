@@ -3,7 +3,6 @@ package get
 import (
 	"fmt"
 
-	"github.com/mal0ner/wikiscrape/internal/manifest"
 	"github.com/mal0ner/wikiscrape/internal/util"
 	"github.com/spf13/cobra"
 )
@@ -21,7 +20,7 @@ var pagesCmd = &cobra.Command{
 	Long:  pagesMsg,
 	Args:  cobra.NoArgs,
 	RunE: func(_ *cobra.Command, _ []string) error {
-		pageNames, err := manifest.ReadFrom(manFile)
+		pageNames, err := util.ReadManifestFrom(manFile)
 		if err != nil {
 			return err
 		}

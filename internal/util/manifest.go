@@ -1,4 +1,4 @@
-package manifest
+package util
 
 import (
 	"os"
@@ -10,7 +10,7 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type Manifest []string
 
-func ReadFrom(filepath string) (Manifest, error) {
+func ReadManifestFrom(filepath string) (Manifest, error) {
 	manFile, err := os.ReadFile(filepath)
 	if err != nil {
 		return nil, err

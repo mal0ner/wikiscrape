@@ -2,8 +2,8 @@ package wiki
 
 import (
 	"github.com/mal0ner/wikiscrape/internal/export"
-	"github.com/mal0ner/wikiscrape/internal/manifest"
 	"github.com/mal0ner/wikiscrape/internal/scrape"
+	"github.com/mal0ner/wikiscrape/internal/util"
 )
 
 type MediaWiki struct {
@@ -11,16 +11,9 @@ type MediaWiki struct {
 	BaseURL string
 	scrape.Scraper
 	export.Exporter
-	manifest.Manifest
+	util.Manifest
 }
 
-// TODO: Decide on best approach for reflecting command-line args for
-// scraper and export initialization. Do we embed them in the wiki
-// struct like this and just pass them into the constructor via
-// an argument, or pass an instance of scrape.Scraper / export.Exporter
-// into the ScrapeAndExport methods manually?
-// Passing them into the NewMediaWiki might be the easiest way for other
-// people to interact with this as a library??
 func NewMediaWiki(name string, baseURL string) MediaWiki {
 	return MediaWiki{
 		Name:     name,
@@ -30,7 +23,8 @@ func NewMediaWiki(name string, baseURL string) MediaWiki {
 	}
 }
 
-func (w MediaWiki) ScrapeAndExport(man manifest.Manifest) error {
+// TODO: Add Pointer receiver here
+func (w MediaWiki) ScrapeAndExport(man util.Manifest) error {
 	// Exporting pages individually as they are gathered seems to be the
 	// best approach here, aggregating thousands of pages into a slice
 	// of structs only to export them immediately after seems like a waste
@@ -47,6 +41,7 @@ func (w MediaWiki) ScrapeAndExport(man manifest.Manifest) error {
 }
 
 // TODO: Rename this and maybe make the scraper methods private??
+// TODO: Add Pointer receiver here
 func (w MediaWiki) Page(path string) error {
 	page, err := w.GetPage(path)
 	if err != nil {
@@ -57,6 +52,7 @@ func (w MediaWiki) Page(path string) error {
 }
 
 // TODO: Rename this and maybe make the scraper methods private??
+// TODO: Add Pointer receiver here
 func (w MediaWiki) Section(path string, heading string) error {
 	page, err := w.GetSection(path, heading)
 	if err != nil {
