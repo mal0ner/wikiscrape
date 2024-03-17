@@ -9,6 +9,7 @@ import (
 // wikiInfo represents the basic information needed
 // to add support for querying a wiki's API.
 type wikiInfo struct {
+	Name           string
 	APIPath        string
 	PagePathPrefix string
 	Backend        string
@@ -24,20 +25,20 @@ type QueryData struct {
 
 // newWikiInfo initializes a new wikiInfo object, which represents the basic information
 // needed to add support for querying a wiki's API.
-func newWikiInfo(apiPath string, pagePrefix string, backend string) *wikiInfo {
-	return &wikiInfo{apiPath, pagePrefix, backend}
+func newWikiInfo(name string, apiPath string, pagePrefix string, backend string) *wikiInfo {
+	return &wikiInfo{name, apiPath, pagePrefix, backend}
 }
 
 // Map supported wiki names to relevant query info
 var wikiNameInfo = map[string]*wikiInfo{
-	"wikipedia": newWikiInfo("https://en.wikipedia.org/w/api.php", "/wiki/", "mediawiki"),
-	"osrs":      newWikiInfo("https://oldschool.runescape.wiki/api.php", "/w/", "mediawiki"),
+	"wikipedia": newWikiInfo("Wikipedia", "https://en.wikipedia.org/w/api.php", "/wiki/", "mediawiki"),
+	"osrs":      newWikiInfo("Old School Runescape", "https://oldschool.runescape.wiki/api.php", "/w/", "mediawiki"),
 }
 
 // Map supported wiki hosts to relevant query info
 var wikiHostInfo = map[string]*wikiInfo{
-	"en.wikipedia.org":         newWikiInfo("https://en.wikipedia.org/w/api.php", "/wiki/", "mediawiki"),
-	"oldschool.runescape.wiki": newWikiInfo("https://oldschool.runescape.wiki/api.php", "/w/", "mediawiki"),
+	"en.wikipedia.org":         newWikiInfo("Wikipedia", "https://en.wikipedia.org/w/api.php", "/wiki/", "mediawiki"),
+	"oldschool.runescape.wiki": newWikiInfo("Old School Runescape", "https://oldschool.runescape.wiki/api.php", "/w/", "mediawiki"),
 }
 
 var supportedBackends = []string{
@@ -121,7 +122,22 @@ func GetSupportedWikis() []string {
 }
 
 // GetSupportedBackends returns a list of the names of all wiki backends
-// supported by wikiscrape
+// supported by wikiscrape.
 func GetSupportedBackends() []string {
 	return supportedBackends
+}
+
+// GetWikiInfoStrings returns a formatted slice of strings containing relevant
+// information about the wikis supported by wikiscrape. This function is designed for
+// use with the List command.
+func GetWikiInfoStrings(backendFilter string) []string {
+	items := make([]string, len(wikiNameInfo))
+	i := 0
+	for k, v := range wikiNameInfo {
+		if v.Backend == backendFilter || backendFilter == "" {
+			items[i] = fmt.Sprintf("%s: [alias: %s, backend: %s]", v.Name, k, v.Backend)
+		}
+		i++
+	}
+	return items
 }
