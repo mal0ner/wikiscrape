@@ -39,8 +39,9 @@ var pagesCmd = &cobra.Command{
 }
 
 func init() {
-	pagesCmd.Flags().StringVarP(&manFile, "from-manifest", "f", "", "path to the manifest file")
-	pagesCmd.Flags().StringVarP(&wikiName, "wiki", "w", "", "name of the wiki you wish to scrape")
+	flagSet := pagesCmd.Flags()
+	flagSet.StringVarP(&manFile, "from-manifest", "f", "", "path to the manifest file")
+	flagSet.StringVarP(&wikiName, "wiki", "w", "", "name of the wiki you wish to scrape")
 	pagesCmd.MarkPersistentFlagRequired("wiki")
 	pagesCmd.MarkFlagRequired("from-manifest")
 	pagesCmd.MarkFlagRequired("wiki")
