@@ -15,10 +15,11 @@ var manFile string
 
 // Command
 var pagesCmd = &cobra.Command{
-	Use:   "pages",
-	Short: "Get all pages listed in a file",
-	Long:  pagesMsg,
-	Args:  cobra.NoArgs,
+	Use:          "pages",
+	Short:        "Get all pages listed in a file",
+	Long:         pagesMsg,
+	Args:         cobra.NoArgs,
+	SilenceUsage: true,
 	RunE: func(_ *cobra.Command, _ []string) error {
 		pageNames, err := util.ReadManifestFrom(manFile)
 		if err != nil {

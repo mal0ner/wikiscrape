@@ -16,11 +16,12 @@ var section string
 
 // Command
 var GetCmd = &cobra.Command{
-	Use: "get [url|page|section]",
+	Use: "get [url]",
 	// SilenceUsage: true,
-	Short: "Get a page or section from a wiki",
-	Long:  getMsg,
-	Args:  cobra.ExactArgs(1),
+	Short:        "Get a page or section from a wiki",
+	Long:         getMsg,
+	Args:         cobra.ExactArgs(1),
+	SilenceUsage: true,
 	RunE: func(_ *cobra.Command, args []string) error {
 		return getPageFromURL(args[0], section)
 	},

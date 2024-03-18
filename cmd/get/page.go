@@ -12,10 +12,11 @@ var wikiName string
 
 // Command
 var pageCmd = &cobra.Command{
-	Use:   "page",
-	Short: "Get a single page",
-	Long:  "Get a single page",
-	Args:  cobra.ExactArgs(1),
+	Use:          "page",
+	Short:        "Get a single page",
+	Long:         "Get a single page",
+	Args:         cobra.ExactArgs(1),
+	SilenceUsage: true,
 	RunE: func(_ *cobra.Command, args []string) error {
 		pageName := args[0]
 		return getPageFromName(pageName, wikiName, section)
