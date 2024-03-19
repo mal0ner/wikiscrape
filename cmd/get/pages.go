@@ -30,11 +30,11 @@ var pagesCmd = &cobra.Command{
 			fmt.Println(err.Error())
 			return err
 		}
-		w, err := getWikiFromQueryData(queryData)
+		wiki, err := getWikiFromQueryData(queryData)
 		if err != nil {
 			return err
 		}
-		err = w.ScrapeAndExport(pageNames)
+		err = wiki.ScrapeManifest(pageNames)
 		return nil
 	},
 }

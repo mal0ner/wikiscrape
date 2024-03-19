@@ -6,5 +6,5 @@ package export
 import "github.com/mal0ner/wikiscrape/internal/scrape"
 
 type Exporter interface {
-	Export(page scrape.Page)
+	Export(page *scrape.Page)
 }

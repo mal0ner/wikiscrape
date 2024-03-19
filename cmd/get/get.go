@@ -40,7 +40,8 @@ func getWikiFromQueryData(queryData *util.QueryData) (wiki.Wiki, error) {
 	backend := util.TrimLower(queryData.Info.Backend)
 	switch backend {
 	case "mediawiki":
-		return wiki.NewMediaWiki(backend, queryData.Info.APIPath), nil
+		mediaWiki := wiki.NewMediaWiki(backend, queryData.Info.APIPath)
+		return mediaWiki, nil
 	}
 	return nil, &util.WikiNotSupportedError{
 		Code: "backendnotsupported",
@@ -56,15 +57,15 @@ func getPageFromURL(rawURL string, section string) error {
 	if err != nil {
 		return err
 	}
-	w, err := getWikiFromQueryData(queryData)
+	wiki, err := getWikiFromQueryData(queryData)
 	if err != nil {
 		return err
 	}
 
 	if section != "" {
-		return w.Section(queryData.Page, section)
+		return wiki.ScrapeSection(queryData.Page, section)
 	}
-	return w.Page(queryData.Page)
+	return wiki.ScrapePage(queryData.Page)
 }
 
 // getPageFromName checks wikiscrape support for the provided wikiName. If supported, the appropriate
@@ -78,12 +79,12 @@ func getPageFromName(pageName string, wikiName string, section string) error {
 	if err != nil {
 		return err
 	}
-	w, err := getWikiFromQueryData(queryData)
+	wiki, err := getWikiFromQueryData(queryData)
 	if err != nil {
 		return err
 	}
 	if section != "" {
-		return w.Section(queryData.Page, section)
+		return wiki.ScrapeSection(queryData.Page, section)
 	}
-	return w.Page(queryData.Page)
+	return wiki.ScrapePage(queryData.Page)
 }

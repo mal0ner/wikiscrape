@@ -8,7 +8,7 @@ import (
 
 type TestExporter struct{}
 
-func (te *TestExporter) Export(page scrape.Page) {
+func (te *TestExporter) Export(page *scrape.Page) {
 	fmt.Println("Title: " + page.Title)
 	for _, s := range page.Sections {
 		fmt.Println("Section: " + s.Heading + "--------------------------------------\n")

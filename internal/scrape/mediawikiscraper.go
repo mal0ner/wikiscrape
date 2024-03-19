@@ -122,11 +122,11 @@ func (s *MediaWikiScraper) fetchPage(path string) (*mediaWikiPageResponse, error
 func (s *MediaWikiScraper) GetPage(path string) (*Page, error) {
 	response, err := s.fetchPage(path)
 	if err != nil {
-		return &Page{}, err
+		return nil, err
 	}
 	sections, err := response.ParseSections()
 	if err != nil {
-		return &Page{}, err
+		return nil, err
 	}
 	return &Page{
 		Title:    response.Parse.Title,
@@ -138,11 +138,11 @@ func (s *MediaWikiScraper) GetPage(path string) (*Page, error) {
 func (s *MediaWikiScraper) GetSection(path string, heading string) (*Page, error) {
 	response, err := s.fetchPage(path)
 	if err != nil {
-		return &Page{}, err
+		return nil, err
 	}
 	section, err := response.ParseSection(heading)
 	if err != nil {
-		return &Page{}, err
+		return nil, err
 	}
 	return &Page{
 		Title:    response.Parse.Title,
