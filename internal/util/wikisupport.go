@@ -141,3 +141,29 @@ func GetWikiInfoStrings(backendFilter string) []string {
 	}
 	return items
 }
+
+// GetWikiInfoFromHost takes a URL host segment and returns its corresponding wikiInfo.
+// Fails if the wiki is not supported by wikiscrape.
+func GetWikiInfoFromHost(host string) (*wikiInfo, error) {
+	info, ok := wikiHostInfo[host]
+	if !ok {
+		return nil, &WikiNotSupportedError{
+			Code: "hostnotfound",
+			Info: "The provided host if not yet supported (uknown api endpoint or page prefix)",
+		}
+	}
+	return info, nil
+}
+
+// GetWikiInfoFromName takes a wiki name and returns its corresponding wikiInfo.
+// Fails if the wiki is not supported by wikiscrape.
+func GetWikiInfoFromName(name string) (*wikiInfo, error) {
+	info, ok := wikiNameInfo[name]
+	if !ok {
+		return nil, &WikiNotSupportedError{
+			Code: "namenotfound",
+			Info: "The provided name is not yet supported (unknown api endpoint or page prefix)",
+		}
+	}
+	return info, nil
+}
