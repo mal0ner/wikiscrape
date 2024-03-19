@@ -3,3 +3,10 @@
   <br>
   <b>🌐 Get wiki pages from the command line. Increase brain volume 🧠.</b>
 </div>
+
+---
+
+<div align="center">
+  <img alt="GitHub go.mod Go version" src="https://img.shields.io/github/go-mod/go-version/mal0ner/wikiscrape?style=for-the-badge&logo=go">
+  <a href="https://github.com/gojp/goreportcard"><img alt="Static Badge" src="https://img.shields.io/badge/Go_report-A%2B-success?style=for-the-badge&logo=go"></a>
+</div>
